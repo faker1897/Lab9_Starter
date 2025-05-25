@@ -67,7 +67,11 @@
         <output></output>
       </fieldset>
     </form>
-
+<!--    <article id = "my-number">-->
+<!--      <div>-->
+<!--        <label for="first-num">First Number</label>-->
+<!--      </div>-->
+<!--    </article>-->
     <section id="error-btns">
       <button>Console Log</button>
       <button>Console Error</button>
@@ -86,8 +90,37 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    window.TrackJS && TrackJS.install({
+      token: "b4cfd4e68c934f92851f367ea7d480cb"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+  <script>
+
+    // custom error
+    class numberError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+      }
+    }
+    class div0 extends numberError{
+      constructor() {
+        super('Your divisor is 0');
+
+      }
+    }
+
+    class NAN extends numberError{
+      constructor() {
+        super('Your number is not a number');
+      }
+    }
+
+
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +128,115 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try{
+        if(operator==='/'&& secondNum==='0'){
+          throw new div0();
+        }
+        if(isNaN(firstNum) ||isNaN(secondNum)){
+          throw new NAN();
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      }catch (err){
+        console.error(err.message)
+      }
+
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
-
+    let count = 0;
     // Start your code here
     // You may move this JS to another file if you wish
+    window.onerror=()=>{
+      console.error('error')
+      console.error('warning!warning!warning!Global error')
+      alert('GG')
+      return true;
+    }
+
+
+
+    errorBtns.forEach(btn => {
+      btn.addEventListener('click', e => {
+        switch (e.target.innerHTML) {
+          case 'Console Log':
+            console.log('This is a log');
+            break;
+          case 'Console Error':
+            console.error('This is an error');
+            break;
+          case 'Console Count':
+            console.count('This is a count');
+            console.count('This is a count');
+            console.count('This is a count');
+            break;
+          case 'Console Warn':
+            console.warn('This is a warning');
+            break;
+          case 'Console Assert':
+            console.assert(false, 'This is an assertion');
+            break;
+          case 'Console Clear':
+            console.clear();
+            break;
+          case 'Console Dir':
+            console.dir(document.querySelector('main'));
+            break;
+          case 'Console dirxml':
+            console.dirxml(document.querySelector('main'));
+            break;
+          case 'Console Group Start':
+            console.group('This is a group');
+            console.log('This is a log');
+            console.log('This is a log');
+            console.log('This is a log');
+            count++;
+            break;
+          case 'Console Group End':
+            for(let i=0;i<count;i++){
+              console.groupEnd();
+            }
+            count=0;
+            break;
+          case 'Console Table':
+            console.table([
+              { name: 'YYS', age: 30 },
+              { name: 'YJY', age: 25 },
+             { name: 'WXD', age: 40 }
+            ])
+            break;
+          case 'Start Timer':
+            console.time('Timer');
+            break;
+          case 'End Timer':
+            console.timeEnd('Timer')
+            break;
+          case 'Console Trace':
+            console.trace('Trace');
+            break;
+
+            // global error
+          case 'Trigger a Global Error':
+            throw new Error('Global Error');
+        }
+      })
+    })
+
+    // use try-catch-finally
+    try{
+      const article = document.querySelector('#my-number');
+      article.innerText = 'Hello'; // 会抛错
+      console.log(article.textContent)
+    }catch (err){
+      console.log(err.message)
+    }
+    finally {
+      console.log('number executed');
+    }
+
+
+
+
   </script>
 </body>
 
